@@ -27,4 +27,4 @@ schema:
   log_level: "list(DEBUG|INFO|WARNING|ERROR)?"
   master_key: "str?"
 map:
-  - "addon_configs/litellm-config:/config:rw"
+  - addon_configs/litellm-config:/config:rw
