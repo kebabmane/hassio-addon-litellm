@@ -4,7 +4,7 @@ FROM $BUILD_FROM
 # Set shell
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-# Install Python and LiteLLM
+# Install Python and dependencies
 RUN apk add --no-cache \
     python3 \
     py3-pip \
@@ -15,10 +15,18 @@ RUN apk add --no-cache \
     python3-dev \
     musl-dev \
     libffi-dev \
-    openssl-dev
+    openssl-dev \
+    cargo \
+    rust
 
-# Install bashio and LiteLLM
-RUN pip3 install --no-cache-dir bashio litellm[proxy]
+# Upgrade pip and install wheel
+RUN pip3 install --upgrade pip setuptools wheel
+
+# Install bashio first
+RUN pip3 install --no-cache-dir bashio
+
+# Install LiteLLM with proxy dependencies
+RUN pip3 install --no-cache-dir "litellm[proxy]"
 
 # Copy run script
 COPY run.sh /
