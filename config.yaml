@@ -1,0 +1,28 @@
+name: LiteLLM Proxy
+version: "1.0.0"
+slug: litellm_proxy
+description: "LiteLLM Proxy - Universal LLM API Gateway for Home Assistant"
+url: "https://github.com/BerriAI/litellm"
+arch:
+  - armhf
+  - armv7
+  - aarch64
+  - amd64
+  - i386
+startup: services
+boot: manual
+ports:
+  4000/tcp: 4000
+ports_description:
+  4000/tcp: "LiteLLM Proxy API port"
+options:
+  port: 4000
+  config_file: "config.yaml"
+  log_level: "INFO"
+  master_key: ""
+schema:
+  port: "port"
+  config_file: "str"
+  log_level: "list(DEBUG|INFO|WARNING|ERROR)?"
+  master_key: "str?"
+image: "ghcr.io/berriAI/litellm:main-latest"

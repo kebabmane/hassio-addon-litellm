@@ -1,0 +1,53 @@
+# LiteLLM Proxy Configuration
+# This is an example configuration file for the LiteLLM Proxy add-on
+# Copy this to config.yaml and customize for your needs
+
+model_list:
+  # OpenAI Models
+  - model_name: gpt-4
+    litellm_params:
+      model: gpt-4
+      api_key: os.environ/OPENAI_API_KEY
+  
+  - model_name: gpt-3.5-turbo
+    litellm_params:
+      model: gpt-3.5-turbo
+      api_key: os.environ/OPENAI_API_KEY
+
+  # Anthropic Models
+  - model_name: claude-3-sonnet
+    litellm_params:
+      model: anthropic/claude-3-sonnet-20240229
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+  # Local/Ollama Models (if running Ollama locally)
+  - model_name: llama2
+    litellm_params:
+      model: ollama/llama2
+      api_base: http://localhost:11434
+
+  # Azure OpenAI (example)
+  - model_name: azure-gpt-4
+    litellm_params:
+      model: azure/gpt-4
+      api_base: https://your-resource.openai.azure.com/
+      api_version: "2023-05-15"
+      api_key: os.environ/AZURE_API_KEY
+
+litellm_settings:
+  drop_params: true
+  set_verbose: false
+  telemetry: false
+  num_retries: 3
+  request_timeout: 600
+
+general_settings:
+  # master_key: "your-master-key-here"  # Uncomment and set for authentication
+  # database_url: "sqlite:///litellm.db"  # Optional: for persistent storage
+
+# Environment variables for API keys
+# Set these in your Home Assistant configuration or secrets
+environment_variables:
+  # OPENAI_API_KEY: "your-openai-api-key"
+  # ANTHROPIC_API_KEY: "your-anthropic-api-key"
+  # AZURE_API_KEY: "your-azure-api-key"

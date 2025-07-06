@@ -1,0 +1,7 @@
+build_from:
+  aarch64: "ghcr.io/berriAI/litellm:main-latest"
+  amd64: "ghcr.io/berriAI/litellm:main-latest"
+  armhf: "ghcr.io/berriAI/litellm:main-latest"
+  armv7: "ghcr.io/berriAI/litellm:main-latest"
+  i386: "ghcr.io/berriAI/litellm:main-latest"
+args: {}
