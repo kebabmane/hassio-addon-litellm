@@ -16,17 +16,17 @@ echo "Port: ${port}"
 echo "Config file: ${config_file}"
 echo "Log level: ${log_level}"
 
-# Check if config file exists in /config first, then /data
+# Check if config file exists in /addon_configs/litellm-config first, then /data
 config_path=""
-if [[ -f "/config/${config_file}" ]]; then
-    config_path="/config/${config_file}"
-    echo "Using config file from /config/${config_file}"
+if [[ -f "/addon_configs/litellm-config/${config_file}" ]]; then
+    config_path="/addon_configs/litellm-config/${config_file}"
+    echo "Using config file from /addon_configs/litellm-config/${config_file}"
 elif [[ -f "/data/${config_file}" ]]; then
     config_path="/data/${config_file}"
     echo "Using config file from /data/${config_file}"
 else
     config_path="/data/${config_file}"
-    echo "Config file not found in /config or /data!"
+    echo "Config file not found in /addon_configs/litellm-config or /data!"
     echo "Creating default config file at /data/${config_file}..."
     
     # Create a basic default config if none exists
