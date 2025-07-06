@@ -5,33 +5,34 @@
 # Runs LiteLLM Proxy with Home Assistant configuration
 # ==============================================================================
 
-# Install bashio if not available
-if ! command -v bashio &> /dev/null; then
-    echo "Installing bashio..."
-    pip3 install bashio
-fi
-
 # Set default values
-declare port
-declare config_file
-declare log_level
-declare master_key
+port=4000
+config_file="config.yaml"
+log_level="INFO"
+master_key=""
 
-# Read configuration from Home Assistant
-port=$(bashio::config 'port')
-config_file=$(bashio::config 'config_file')
-log_level=$(bashio::config 'log_level')
-master_key=$(bashio::config 'master_key')
-
-bashio::log.info "Starting LiteLLM Proxy..."
-bashio::log.info "Port: ${port}"
-bashio::log.info "Config file: ${config_file}"
-bashio::log.info "Log level: ${log_level}"
+# Try to read configuration from Home Assistant
+if command -v bashio &> /dev/null; then
+    port=$(bashio::config 'port' || echo "4000")
+    config_file=$(bashio::config 'config_file' || echo "config.yaml")
+    log_level=$(bashio::config 'log_level' || echo "INFO")
+    master_key=$(bashio::config 'master_key' || echo "")
+    
+    bashio::log.info "Starting LiteLLM Proxy..."
+    bashio::log.info "Port: ${port}"
+    bashio::log.info "Config file: ${config_file}"
+    bashio::log.info "Log level: ${log_level}"
+else
+    echo "Starting LiteLLM Proxy..."
+    echo "Port: ${port}"
+    echo "Config file: ${config_file}"
+    echo "Log level: ${log_level}"
+fi
 
 # Check if config file exists
 if [[ ! -f "/data/${config_file}" ]]; then
-    bashio::log.warning "Config file /data/${config_file} not found!"
-    bashio::log.info "Creating default config file..."
+    echo "Config file /data/${config_file} not found!"
+    echo "Creating default config file..."
     
     # Create a basic default config if none exists
     cat > "/data/${config_file}" << EOF
@@ -50,7 +51,7 @@ general_settings:
   master_key: "${master_key}"
 EOF
     
-    bashio::log.info "Default config created. Please customize /data/${config_file} with your models and API keys."
+    echo "Default config created. Please customize /data/${config_file} with your models and API keys."
 fi
 
 # Set environment variables for logging
@@ -73,7 +74,7 @@ if [[ "${log_level}" == "DEBUG" ]]; then
     LITELLM_ARGS+=("--detailed_debug")
 fi
 
-bashio::log.info "Starting LiteLLM with arguments: ${LITELLM_ARGS[*]}"
+echo "Starting LiteLLM with arguments: ${LITELLM_ARGS[*]}"
 
 # Start LiteLLM
 exec python3 -m litellm "${LITELLM_ARGS[@]}"
