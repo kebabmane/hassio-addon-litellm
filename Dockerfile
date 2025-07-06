@@ -1,11 +1,13 @@
-# Use LiteLLM official image as base
-FROM ghcr.io/berriai/litellm:main-latest
+FROM python:3.11-alpine
 
 # Set shell
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-# Install bashio for Home Assistant integration
-RUN pip3 install --no-cache-dir bashio
+# Install system dependencies
+RUN apk add --no-cache bash curl jq
+
+# Install Python packages without cache to avoid conflicts
+RUN pip install --no-cache-dir bashio litellm
 
 # Copy run script
 COPY run.sh /
