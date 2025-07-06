@@ -1,26 +1,17 @@
-ARG BUILD_FROM
-FROM $BUILD_FROM
+# Use LiteLLM official image as base
+FROM ghcr.io/berriAI/litellm:main-latest
 
 # Set shell
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-# Install system dependencies
-RUN apk add --no-cache \
-    bash \
-    curl \
-    jq
-
-# Install bashio
+# Install bashio for Home Assistant integration
 RUN pip3 install --no-cache-dir bashio
-
-# Use pre-built LiteLLM image content
-RUN pip3 install --no-cache-dir litellm
 
 # Copy run script
 COPY run.sh /
 RUN chmod a+x /run.sh
 
-# Create config directory
+# Create config directory for Home Assistant
 RUN mkdir -p /data
 
 # Set working directory
