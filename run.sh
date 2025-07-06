@@ -16,10 +16,18 @@ echo "Port: ${port}"
 echo "Config file: ${config_file}"
 echo "Log level: ${log_level}"
 
-# Check if config file exists
-if [[ ! -f "/data/${config_file}" ]]; then
-    echo "Config file /data/${config_file} not found!"
-    echo "Creating default config file..."
+# Check if config file exists in /config first, then /data
+config_path=""
+if [[ -f "/config/${config_file}" ]]; then
+    config_path="/config/${config_file}"
+    echo "Using config file from /config/${config_file}"
+elif [[ -f "/data/${config_file}" ]]; then
+    config_path="/data/${config_file}"
+    echo "Using config file from /data/${config_file}"
+else
+    config_path="/data/${config_file}"
+    echo "Config file not found in /config or /data!"
+    echo "Creating default config file at /data/${config_file}..."
     
     # Create a basic default config if none exists
     cat > "/data/${config_file}" << EOF
@@ -46,7 +54,7 @@ export LITELLM_LOG_LEVEL="${log_level}"
 
 # Prepare LiteLLM command arguments
 LITELLM_ARGS=(
-    "--config" "/data/${config_file}"
+    "--config" "${config_path}"
     "--port" "${port}"
     "--host" "0.0.0.0"
 )

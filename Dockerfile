@@ -22,8 +22,8 @@ RUN pip3 install --no-cache-dir "litellm[proxy]"
 COPY run.sh /
 RUN chmod a+x /run.sh
 
-# Create config directory for Home Assistant
-RUN mkdir -p /data
+# Create directories for Home Assistant
+RUN mkdir -p /data /config
 
 # Set working directory
 WORKDIR /data
