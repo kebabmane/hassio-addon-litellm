@@ -1,5 +1,5 @@
 # Use LiteLLM official image as base
-FROM ghcr.io/berriAI/litellm:main-latest
+FROM ghcr.io/berriai/litellm:main-latest
 
 # Set shell
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
