@@ -1,10 +1,10 @@
 FROM python:3.11-alpine
 
-# Set shell
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-
-# Install system dependencies
+# Install system dependencies including bash
 RUN apk add --no-cache bash curl jq
+
+# Set shell to bash after installation
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Install Python packages without cache to avoid conflicts
 RUN pip install --no-cache-dir bashio litellm

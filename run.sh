@@ -1,4 +1,4 @@
-#!/usr/bin/with-contenv bashio
+#!/bin/bash
 
 # ==============================================================================
 # Home Assistant Add-on: LiteLLM Proxy
