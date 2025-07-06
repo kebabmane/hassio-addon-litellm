@@ -63,5 +63,5 @@ fi
 
 echo "Starting LiteLLM with arguments: ${LITELLM_ARGS[*]}"
 
-# Start LiteLLM
-exec python3 -m litellm "${LITELLM_ARGS[@]}"
+# Start LiteLLM using the direct CLI command
+exec litellm "${LITELLM_ARGS[@]}"
