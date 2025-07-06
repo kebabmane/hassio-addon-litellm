@@ -23,7 +23,7 @@ COPY run.sh /
 RUN chmod a+x /run.sh
 
 # Create directories for Home Assistant
-RUN mkdir -p /data /addon_configs/litellm-config
+RUN mkdir -p /data
 
 # Set working directory
 WORKDIR /data
