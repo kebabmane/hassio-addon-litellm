@@ -1,13 +1,19 @@
-FROM python:3.11-alpine
+FROM ubuntu:22.04
 
-# Install system dependencies including bash
-RUN apk add --no-cache bash curl jq
+# Avoid interactive prompts
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Set shell to bash after installation
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    bash \
+    curl \
+    jq \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install Python packages without cache to avoid conflicts
-RUN pip install --no-cache-dir bashio litellm
+# Install Python packages
+RUN pip3 install --no-cache-dir bashio litellm
 
 # Copy run script
 COPY run.sh /

@@ -1,5 +1,5 @@
 name: LiteLLM Proxy
-version: "1.0.0"
+version: "1.0.1"
 slug: litellm_proxy
 description: "LiteLLM Proxy - Universal LLM API Gateway for Home Assistant"
 url: "https://github.com/BerriAI/litellm"
