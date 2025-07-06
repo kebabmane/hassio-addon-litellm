@@ -11,6 +11,7 @@ arch:
   - i386
 startup: services
 boot: manual
+init: false
 ports:
   4000/tcp: 4000
 ports_description:
@@ -25,4 +26,3 @@ schema:
   config_file: "str"
   log_level: "list(DEBUG|INFO|WARNING|ERROR)?"
   master_key: "str?"
-image: "ghcr.io/berriAI/litellm:main-latest"

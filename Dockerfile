@@ -1,14 +1,24 @@
-ARG BUILD_FROM=ghcr.io/berriAI/litellm:main-latest
+ARG BUILD_FROM
 FROM $BUILD_FROM
 
 # Set shell
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-# Install additional packages needed for Home Assistant integration
+# Install Python and LiteLLM
 RUN apk add --no-cache \
+    python3 \
+    py3-pip \
     bash \
     curl \
-    jq
+    jq \
+    gcc \
+    python3-dev \
+    musl-dev \
+    libffi-dev \
+    openssl-dev
+
+# Install bashio and LiteLLM
+RUN pip3 install --no-cache-dir bashio litellm[proxy]
 
 # Copy run script
 COPY run.sh /

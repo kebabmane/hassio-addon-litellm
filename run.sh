@@ -5,6 +5,12 @@
 # Runs LiteLLM Proxy with Home Assistant configuration
 # ==============================================================================
 
+# Install bashio if not available
+if ! command -v bashio &> /dev/null; then
+    echo "Installing bashio..."
+    pip3 install bashio
+fi
+
 # Set default values
 declare port
 declare config_file
@@ -70,4 +76,4 @@ fi
 bashio::log.info "Starting LiteLLM with arguments: ${LITELLM_ARGS[*]}"
 
 # Start LiteLLM
-exec litellm "${LITELLM_ARGS[@]}"
+exec python3 -m litellm "${LITELLM_ARGS[@]}"
