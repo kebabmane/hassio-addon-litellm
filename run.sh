@@ -2,32 +2,19 @@
 
 # ==============================================================================
 # Home Assistant Add-on: LiteLLM Proxy
-# Runs LiteLLM Proxy with Home Assistant configuration
+# Runs LiteLLM Proxy with simple configuration
 # ==============================================================================
 
-# Set default values
-port=4000
-config_file="config.yaml"
-log_level="INFO"
-master_key=""
+# Set default values (can be overridden by environment variables)
+port=${PORT:-4000}
+config_file=${CONFIG_FILE:-"config.yaml"}
+log_level=${LOG_LEVEL:-"INFO"}
+master_key=${MASTER_KEY:-""}
 
-# Try to read configuration from Home Assistant
-if command -v bashio &> /dev/null; then
-    port=$(bashio::config 'port' || echo "4000")
-    config_file=$(bashio::config 'config_file' || echo "config.yaml")
-    log_level=$(bashio::config 'log_level' || echo "INFO")
-    master_key=$(bashio::config 'master_key' || echo "")
-    
-    bashio::log.info "Starting LiteLLM Proxy..."
-    bashio::log.info "Port: ${port}"
-    bashio::log.info "Config file: ${config_file}"
-    bashio::log.info "Log level: ${log_level}"
-else
-    echo "Starting LiteLLM Proxy..."
-    echo "Port: ${port}"
-    echo "Config file: ${config_file}"
-    echo "Log level: ${log_level}"
-fi
+echo "Starting LiteLLM Proxy..."
+echo "Port: ${port}"
+echo "Config file: ${config_file}"
+echo "Log level: ${log_level}"
 
 # Check if config file exists
 if [[ ! -f "/data/${config_file}" ]]; then

@@ -12,8 +12,11 @@ RUN apt-get update && apt-get install -y \
     jq \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python packages
-RUN pip3 install --no-cache-dir bashio litellm
+# Upgrade pip first
+RUN python3 -m pip install --upgrade pip
+
+# Install only litellm (skip bashio for now)
+RUN pip3 install --no-cache-dir litellm
 
 # Copy run script
 COPY run.sh /
