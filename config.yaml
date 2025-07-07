@@ -13,7 +13,7 @@ startup: services
 boot: manual
 init: false
 map:
-  - addon_config:rw
+  - config:rw
 ports:
   4000/tcp: 4000
 ports_description:

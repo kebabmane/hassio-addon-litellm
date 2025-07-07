@@ -23,10 +23,10 @@ COPY run.sh /
 RUN chmod a+x /run.sh
 
 # Create directories for Home Assistant
-RUN mkdir -p /data
+RUN mkdir -p /config
 
 # Set working directory
-WORKDIR /data
+WORKDIR /config
 
 # Expose port
 EXPOSE 4000

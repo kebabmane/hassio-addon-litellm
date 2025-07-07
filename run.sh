@@ -16,16 +16,16 @@ echo "Port: ${port}"
 echo "Config file: ${config_file}"
 echo "Log level: ${log_level}"
 
-# Check if config file exists in /data
-config_path="/data/${config_file}"
+# Check if config file exists in /config
+config_path="/config/${config_file}"
 if [[ -f "${config_path}" ]]; then
-    echo "Using config file from /data/${config_file}"
+    echo "Using config file from /config/${config_file}"
 else
-    echo "Config file not found in /data!"
-    echo "Creating default config file at /data/${config_file}..."
+    echo "Config file not found in /config!"
+    echo "Creating default config file at /config/${config_file}..."
     
     # Create a basic default config if none exists
-    cat > "/data/${config_file}" << EOF
+    cat > "/config/${config_file}" << EOF
 model_list:
   - model_name: gpt-3.5-turbo
     litellm_params:
@@ -41,7 +41,7 @@ general_settings:
   master_key: "${master_key}"
 EOF
     
-    echo "Default config created. Please customize /data/${config_file} with your models and API keys."
+    echo "Default config created. Please customize /config/${config_file} with your models and API keys."
 fi
 
 # Set environment variables for logging
