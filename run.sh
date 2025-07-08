@@ -16,16 +16,19 @@ echo "Port: ${port}"
 echo "Config file: ${config_file}"
 echo "Log level: ${log_level}"
 
-# Check if config file exists in /config
-config_path="/config/${config_file}"
+# Check if config file exists in the correct addon config directory
+config_path="/config/addons_config/litellm/${config_file}"
 if [[ -f "${config_path}" ]]; then
-    echo "Using config file from /config/${config_file}"
+    echo "Using config file from /config/addons_config/litellm/${config_file}"
 else
-    echo "Config file not found in /config!"
-    echo "Creating default config file at /config/${config_file}..."
+    echo "Config file not found in /config/addons_config/litellm/!"
+    echo "Creating addon config directory and default config file..."
+    
+    # Create the addon config directory if it doesn't exist
+    mkdir -p "/config/addons_config/litellm"
     
     # Create a basic default config if none exists
-    cat > "/config/${config_file}" << EOF
+    cat > "${config_path}" << EOF
 model_list:
   - model_name: gpt-3.5-turbo
     litellm_params:
@@ -41,7 +44,7 @@ general_settings:
   master_key: "${master_key}"
 EOF
     
-    echo "Default config created. Please customize /config/${config_file} with your models and API keys."
+    echo "Default config created. Please customize /config/addons_config/litellm/${config_file} with your models and API keys."
 fi
 
 # Set environment variables for logging
