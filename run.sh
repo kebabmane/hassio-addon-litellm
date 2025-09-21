@@ -16,40 +16,57 @@ echo "Port: ${port}"
 echo "Config file: ${config_file}"
 echo "Log level: ${log_level}"
 
-# Ensure Prisma client is generated into the add-on config dir so it persists between restarts
+# Ensure Prisma client for litellm is available before starting the proxy
 schema_path=$(python3 - <<'PY'
 import pathlib
 import litellm
-schema = pathlib.Path(litellm.__file__).parent / "proxy" / "prisma" / "schema.prisma"
-print(schema)
+print(pathlib.Path(litellm.__file__).parent / "proxy" / "schema.prisma")
 PY
 )
 
-prisma_cache_dir="/config/addons_config/litellm/prisma"
-mkdir -p "${prisma_cache_dir}"
+ensure_prisma_client() {
+    python3 - <<'PY'
+import sys
 
-if [[ -f "${schema_path}" ]]; then
-    echo "Copying Prisma schema to ${prisma_cache_dir}"
-    cp "${schema_path}" "${prisma_cache_dir}/schema.prisma"
-    echo "Generating Prisma client using schema at ${prisma_cache_dir}/schema.prisma"
-    pushd "${prisma_cache_dir}" >/dev/null || {
-        echo "Failed to enter ${prisma_cache_dir}; cannot continue." >&2
-        exit 1
-    }
-    if ! python3 -m prisma generate --schema "${prisma_cache_dir}/schema.prisma"; then
-        popd >/dev/null
-        echo "Failed to generate Prisma client; cannot continue." >&2
-        exit 1
-    fi
-    popd >/dev/null
-    if [[ ! -d "${prisma_cache_dir}/prisma" ]]; then
-        echo "Prisma generation did not produce a client in ${prisma_cache_dir}/prisma" >&2
-        exit 1
-    fi
-    export PYTHONPATH="${prisma_cache_dir}:${PYTHONPATH}"
-    echo "PYTHONPATH updated to include generated Prisma client: ${PYTHONPATH}"
+try:
+    from prisma import Prisma  # noqa: F401
+except Exception:
+    sys.exit(1)
+sys.exit(0)
+PY
+}
+
+if ensure_prisma_client; then
+    echo "Prisma client already present; skipping generation."
 else
-    echo "Prisma schema not found at ${schema_path}; skipping client generation."
+    echo "Prisma client missing; attempting generation."
+    prisma_pkg_dir=$(python3 - <<'PY'
+import prisma, pathlib
+print(pathlib.Path(prisma.__file__).parent)
+PY
+)
+    echo "Detected prisma package directory: ${prisma_pkg_dir}"
+    export PRISMA_HOME_DIR="/config/addons_config/litellm/.prisma_cache"
+    mkdir -p "${PRISMA_HOME_DIR}"
+    if [[ -z "${DATABASE_URL}" ]]; then
+        export DATABASE_URL="postgresql://user:password@localhost:5432/postgres"
+        echo "DATABASE_URL not set; using placeholder for generation."
+    fi
+    if [[ ! -f "${schema_path}" ]]; then
+        echo "Prisma schema not found at ${schema_path}; cannot generate client." >&2
+        exit 1
+    fi
+    echo "Running prisma generate using schema ${schema_path}"
+    if ! python3 -m prisma generate --schema "${schema_path}"; then
+        echo "Prisma generate failed; cannot continue." >&2
+        exit 1
+    fi
+    if ensure_prisma_client; then
+        echo "Prisma client generated successfully at ${prisma_pkg_dir}."
+    else
+        echo "Prisma client generation completed but client still unavailable." >&2
+        exit 1
+    fi
 fi
 
 # Check if config file exists in the correct addon config directory
