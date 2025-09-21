@@ -51,8 +51,23 @@ sys.exit(0)
 PY
 }
 
-if [[ -z "${DATABASE_URL}" && -f "${config_path}" ]]; then
-    config_db_url=$(python3 - "${config_path}" <<'PY'
+if [[ -f "${config_path}" ]]; then
+    while IFS='=' read -r key value; do
+        case "${key}" in
+            DATABASE_URL)
+                if [[ -z "${DATABASE_URL}" && -n "${value}" ]]; then
+                    export DATABASE_URL="${value}"
+                    echo "DATABASE_URL loaded from config file ${config_path}."
+                fi
+                ;;
+            TZ)
+                if [[ -n "${value}" ]]; then
+                    export TZ="${value}"
+                    echo "TZ set from config file ${config_path}: ${TZ}"
+                fi
+                ;;
+        esac
+    done < <(python3 - "${config_path}" <<'PY'
 import sys
 from pathlib import Path
 
@@ -69,15 +84,16 @@ with config_path.open("r", encoding="utf-8") as f:
     data = yaml.safe_load(f) or {}
 
 general = data.get("general_settings") or {}
+
 db_url = general.get("database_url")
 if db_url:
-    print(db_url)
+    print(f"DATABASE_URL={db_url}")
+
+timezone = general.get("timezone")
+if timezone:
+    print(f"TZ={timezone}")
 PY
     )
-    if [[ -n "${config_db_url}" ]]; then
-        export DATABASE_URL="${config_db_url}"
-        echo "DATABASE_URL loaded from config file ${config_path}."
-    fi
 fi
 
 if [[ -z "${schema_path}" ]]; then

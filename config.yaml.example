@@ -44,6 +44,7 @@ litellm_settings:
 general_settings:
   # master_key: "your-master-key-here"  # Uncomment and set for authentication
   # database_url: "sqlite:///litellm.db"  # Optional: for persistent storage
+  # timezone: "Australia/Sydney"         # Optional: override TZ environment
 
 # Environment variables for API keys
 # Set these in your Home Assistant configuration or secrets

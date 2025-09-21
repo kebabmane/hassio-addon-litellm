@@ -61,6 +61,7 @@ litellm_settings:
 general_settings:
   master_key: "your-secret-key"
   database_url: "sqlite:////config/addons_config/litellm/litellm.db"
+  timezone: "Australia/Sydney"
 ```
 
 ## Database Configuration
@@ -77,6 +78,7 @@ general_settings:
 - **Create the path**: Home Assistant mounts `/config` into the add-on, so the above path will live at `config/addons_config/litellm/litellm.db` on the host. You can pre-create the file or directory, but LiteLLM will create the SQLite file automatically on first start.
 - **Other backends**: You can also use any SQLAlchemy-compatible database (e.g., `postgresql://user:pass@host:5432/litellm`). Ensure the host is reachable from the add-on container and network access is allowed.
 - **Apply changes**: After updating the config file, restart the add-on so LiteLLM picks up the new database connection.
+- **Timezone (optional)**: Set `general_settings.timezone` to propagate a specific `TZ` (for example `Australia/Sydney`) into the add-on container if you need to override Home Assistant's default.
 
 ## Environment Variables
 
