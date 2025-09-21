@@ -47,7 +47,7 @@ model_list:
     litellm_params:
       model: gpt-4
       api_key: os.environ/OPENAI_API_KEY
-  
+
   - model_name: claude-3-sonnet
     litellm_params:
       model: anthropic/claude-3-sonnet-20240229
@@ -60,14 +60,27 @@ litellm_settings:
 
 general_settings:
   master_key: "your-secret-key"
-  database_url: "sqlite:////config/addons_config/litellm/litellm.db"
+  database_url: "postgresql://user:pass@host:5432/litellm"
+  store_model_in_db: true
   timezone: "Australia/Sydney"
 ```
 
 ## Database Configuration
 
-- **Purpose**: LiteLLM can persist request metadata, usage logs, rate limits, or billing information when you supply a database connection URL. Without it, all data is held in memory and lost on restart.
-- **SQLite (recommended to start)**: Point LiteLLM to a file stored in the add-on config share so it survives container upgrades.
+- **Purpose**: LiteLLM can persist request metadata, usage logs, rate limits, billing information, and store model configurations when you supply a database connection URL. Without it, all data is held in memory and lost on restart.
+
+### Database Options
+
+- **PostgreSQL (recommended for production)**: Required for full feature support including UI model management.
+
+```yaml
+general_settings:
+  master_key: "your-secret-key"
+  database_url: "postgresql://user:pass@host:5432/litellm"
+  store_model_in_db: true
+```
+
+- **SQLite (basic use only)**: Suitable for logging and basic functionality, but PostgreSQL is recommended for model storage features.
 
 ```yaml
 general_settings:
@@ -75,8 +88,11 @@ general_settings:
   database_url: "sqlite:////config/addons_config/litellm/litellm.db"
 ```
 
-- **Create the path**: Home Assistant mounts `/config` into the add-on, so the above path will live at `config/addons_config/litellm/litellm.db` on the host. You can pre-create the file or directory, but LiteLLM will create the SQLite file automatically on first start.
-- **Other backends**: You can also use any SQLAlchemy-compatible database (e.g., `postgresql://user:pass@host:5432/litellm`). Ensure the host is reachable from the add-on container and network access is allowed.
+### Important Settings
+
+- **store_model_in_db**: Set to `true` to enable adding/managing models via the LiteLLM UI. This feature works best with PostgreSQL.
+- **Create the path**: For SQLite, Home Assistant mounts `/config` into the add-on, so the above path will live at `config/addons_config/litellm/litellm.db` on the host. LiteLLM will create the SQLite file automatically on first start.
+- **Network access**: For PostgreSQL, ensure the host is reachable from the add-on container and network access is allowed.
 - **Apply changes**: After updating the config file, restart the add-on so LiteLLM picks up the new database connection.
 - **Timezone (optional)**: Set `general_settings.timezone` to propagate a specific `TZ` (for example `Australia/Sydney`) into the add-on container if you need to override Home Assistant's default.
 
