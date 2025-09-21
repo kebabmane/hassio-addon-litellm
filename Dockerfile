@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
     bash \
     curl \
     jq \
+    tzdata \
     && rm -rf /var/lib/apt/lists/*
 
 # Upgrade pip first
