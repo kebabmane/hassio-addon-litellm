@@ -63,7 +63,9 @@ if [[ -f "${config_path}" ]]; then
             TZ)
                 if [[ -n "${value}" ]]; then
                     export TZ="${value}"
+                    export TZDIR="/usr/share/zoneinfo"
                     echo "TZ set from config file ${config_path}: ${TZ}"
+                    echo "TZDIR set to: ${TZDIR}"
                 fi
                 ;;
         esac

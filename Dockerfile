@@ -19,6 +19,9 @@ RUN python3 -m pip install --upgrade pip
 # Install litellm with proxy extras, prisma client, and bundled tzdata fallback
 RUN pip3 install --no-cache-dir "litellm[proxy]" prisma tzdata
 
+# Set timezone data directory for Python
+ENV PYTHONPATH="/usr/share/zoneinfo:$PYTHONPATH"
+
 # Copy run script
 COPY run.sh /
 RUN chmod a+x /run.sh
