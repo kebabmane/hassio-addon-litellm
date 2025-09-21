@@ -9,7 +9,7 @@ This repository contains a Home Assistant add-on for [LiteLLM Proxy](https://git
 1. In Home Assistant, go to **Settings** → **Add-ons** → **Add-on Store**
 2. Click the **⋮** (three dots) menu in the top right
 3. Select **Repositories**
-4. Add this repository URL: `https://github.com/guii/hassio-addon-litellm`
+4. Add this repository URL: `https://github.com/kebabmane/hassio-addon-litellm`
 5. Click **Add**
 
 ### Step 2: Install the Add-on
@@ -27,9 +27,9 @@ This repository contains a Home Assistant add-on for [LiteLLM Proxy](https://git
 
 ### Step 4: Create Configuration File
 
-1. Create a file called `config.yaml` in your `/addon_configs/litellm_proxy/` directory
+1. Create a file called `config.yaml` in your `/addons_config/litellm/` directory (older installs may still use `/addon_configs/litellm_proxy/`)
 2. Use the example configuration from the add-on documentation
-3. Add your API keys and model configurations
+3. Add your API keys, model configurations, and any optional database settings
 
 ### Step 5: Start the Add-on
 
@@ -39,7 +39,7 @@ This repository contains a Home Assistant add-on for [LiteLLM Proxy](https://git
 
 ## Configuration Example
 
-Create `/addon_configs/litellm_proxy/config.yaml`:
+Create `/addons_config/litellm/config.yaml` (older installs may still use `/addon_configs/litellm_proxy/config.yaml`):
 
 ```yaml
 model_list:
@@ -60,7 +60,23 @@ litellm_settings:
 
 general_settings:
   master_key: "your-secret-key"
+  database_url: "sqlite:////config/addons_config/litellm/litellm.db"
 ```
+
+## Database Configuration
+
+- **Purpose**: LiteLLM can persist request metadata, usage logs, rate limits, or billing information when you supply a database connection URL. Without it, all data is held in memory and lost on restart.
+- **SQLite (recommended to start)**: Point LiteLLM to a file stored in the add-on config share so it survives container upgrades.
+
+```yaml
+general_settings:
+  master_key: "your-secret-key"
+  database_url: "sqlite:////config/addons_config/litellm/litellm.db"
+```
+
+- **Create the path**: Home Assistant mounts `/config` into the add-on, so the above path will live at `config/addons_config/litellm/litellm.db` on the host. You can pre-create the file or directory, but LiteLLM will create the SQLite file automatically on first start.
+- **Other backends**: You can also use any SQLAlchemy-compatible database (e.g., `postgresql://user:pass@host:5432/litellm`). Ensure the host is reachable from the add-on container and network access is allowed.
+- **Apply changes**: After updating the config file, restart the add-on so LiteLLM picks up the new database connection.
 
 ## Environment Variables
 
@@ -81,7 +97,7 @@ Once running, the LiteLLM Proxy will be available at:
 
 - [LiteLLM Documentation](https://docs.litellm.ai/)
 - [Home Assistant Community](https://community.home-assistant.io/)
-- [Issues](https://github.com/guii/hassio-addon-litellm/issues)
+- [Issues](https://github.com/kebabmane/hassio-addon-litellm/issues)
 
 ## Add-ons in this Repository
 
