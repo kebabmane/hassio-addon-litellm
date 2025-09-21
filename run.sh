@@ -196,6 +196,9 @@ fi
 # Set environment variables for logging
 export LITELLM_LOG_LEVEL="${log_level}"
 
+# Enable storing models in database
+export STORE_MODEL_IN_DB="True"
+
 # Prepare LiteLLM command arguments
 LITELLM_ARGS=(
     "--config" "${config_path}"
