@@ -16,8 +16,8 @@ RUN apt-get update && apt-get install -y \
 # Upgrade pip first
 RUN python3 -m pip install --upgrade pip
 
-# Install litellm with proxy extras and prisma client for DB features
-RUN pip3 install --no-cache-dir "litellm[proxy]" prisma
+# Install litellm with proxy extras, prisma client, and bundled tzdata fallback
+RUN pip3 install --no-cache-dir "litellm[proxy]" prisma tzdata
 
 # Copy run script
 COPY run.sh /
