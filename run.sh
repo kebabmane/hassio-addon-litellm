@@ -20,7 +20,19 @@ echo "Log level: ${log_level}"
 schema_path=$(python3 - <<'PY'
 import pathlib
 import litellm
-print(pathlib.Path(litellm.__file__).parent / "proxy" / "schema.prisma")
+
+base = pathlib.Path(litellm.__file__).parent
+candidates = [
+    base / "proxy" / "schema.prisma",
+    base / "proxy" / "prisma" / "schema.prisma",
+]
+
+for candidate in candidates:
+    if candidate.exists():
+        print(candidate)
+        break
+else:
+    print("")
 PY
 )
 
@@ -36,7 +48,9 @@ sys.exit(0)
 PY
 }
 
-if ensure_prisma_client; then
+if [[ -z "${schema_path}" ]]; then
+    echo "Prisma schema not found in litellm package; skipping client generation."
+elif ensure_prisma_client; then
     echo "Prisma client already present; skipping generation."
 else
     echo "Prisma client missing; attempting generation."
@@ -47,17 +61,47 @@ PY
 )
     echo "Detected prisma package directory: ${prisma_pkg_dir}"
     export PRISMA_HOME_DIR="/config/addons_config/litellm/.prisma_cache"
-    mkdir -p "${PRISMA_HOME_DIR}"
+    export PRISMA_BINARY_CACHE_DIR="${PRISMA_HOME_DIR}/binaries"
+    mkdir -p "${PRISMA_HOME_DIR}" "${PRISMA_BINARY_CACHE_DIR}"
+    prisma_workdir="/config/addons_config/litellm/prisma_workdir"
+    mkdir -p "${prisma_workdir}"
+    work_schema="${prisma_workdir}/schema.prisma"
+    cp "${schema_path}" "${work_schema}"
+    python3 - "${work_schema}" "${prisma_pkg_dir}" <<'PY'
+import pathlib
+import sys
+
+schema_path = pathlib.Path(sys.argv[1])
+output_path = sys.argv[2]
+
+text = schema_path.read_text()
+
+lines = text.splitlines()
+start = None
+brace_depth = 0
+for idx, line in enumerate(lines):
+    stripped = line.strip()
+    if start is None and stripped.startswith("generator") and "client" in stripped and "{" in stripped:
+        start = idx
+        brace_depth = line.count("{") - line.count("}")
+        continue
+    if start is not None:
+        brace_depth += line.count("{") - line.count("}")
+        if brace_depth == 0:
+            block_lines = lines[start:idx + 1]
+            if not any(l.strip().startswith("output") for l in block_lines):
+                block_lines.insert(len(block_lines) - 1, f"  output   = \"{output_path}\"")
+            lines[start:idx + 1] = block_lines
+            break
+
+schema_path.write_text("\n".join(lines) + "\n")
+PY
     if [[ -z "${DATABASE_URL}" ]]; then
         export DATABASE_URL="postgresql://user:password@localhost:5432/postgres"
         echo "DATABASE_URL not set; using placeholder for generation."
     fi
-    if [[ ! -f "${schema_path}" ]]; then
-        echo "Prisma schema not found at ${schema_path}; cannot generate client." >&2
-        exit 1
-    fi
-    echo "Running prisma generate using schema ${schema_path}"
-    if ! python3 -m prisma generate --schema "${schema_path}"; then
+    echo "Running prisma generate using schema ${work_schema}"
+    if ! python3 -m prisma generate --schema "${work_schema}"; then
         echo "Prisma generate failed; cannot continue." >&2
         exit 1
     fi
