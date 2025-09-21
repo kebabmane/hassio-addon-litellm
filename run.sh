@@ -11,6 +11,9 @@ config_file=${CONFIG_FILE:-"config.yaml"}
 log_level=${LOG_LEVEL:-"INFO"}
 master_key=${MASTER_KEY:-""}
 
+# Resolve config path early so we can reuse it
+config_path="/config/addons_config/litellm/${config_file}"
+
 echo "Starting LiteLLM Proxy..."
 echo "Port: ${port}"
 echo "Config file: ${config_file}"
@@ -47,6 +50,35 @@ except Exception:
 sys.exit(0)
 PY
 }
+
+if [[ -z "${DATABASE_URL}" && -f "${config_path}" ]]; then
+    config_db_url=$(python3 - "${config_path}" <<'PY'
+import sys
+from pathlib import Path
+
+try:
+    import yaml
+except ImportError:
+    sys.exit()
+
+config_path = Path(sys.argv[1])
+if not config_path.exists():
+    sys.exit()
+
+with config_path.open("r", encoding="utf-8") as f:
+    data = yaml.safe_load(f) or {}
+
+general = data.get("general_settings") or {}
+db_url = general.get("database_url")
+if db_url:
+    print(db_url)
+PY
+    )
+    if [[ -n "${config_db_url}" ]]; then
+        export DATABASE_URL="${config_db_url}"
+        echo "DATABASE_URL loaded from config file ${config_path}."
+    fi
+fi
 
 if [[ -z "${schema_path}" ]]; then
     echo "Prisma schema not found in litellm package; skipping client generation."
@@ -114,7 +146,6 @@ PY
 fi
 
 # Check if config file exists in the correct addon config directory
-config_path="/config/addons_config/litellm/${config_file}"
 if [[ -f "${config_path}" ]]; then
     echo "Using config file from /config/addons_config/litellm/${config_file}"
 else
