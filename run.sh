@@ -16,6 +16,25 @@ echo "Port: ${port}"
 echo "Config file: ${config_file}"
 echo "Log level: ${log_level}"
 
+# Ensure Prisma client is generated before starting LiteLLM when DB features are used
+schema_path=$(python3 - <<'PY'
+import pathlib
+import litellm
+schema = pathlib.Path(litellm.__file__).parent / "proxy" / "prisma" / "schema.prisma"
+print(schema)
+PY
+)
+
+if [[ -f "${schema_path}" ]]; then
+    echo "Generating Prisma client from schema at ${schema_path}"
+    if ! python3 -m prisma generate --schema "${schema_path}"; then
+        echo "Failed to generate Prisma client; cannot continue." >&2
+        exit 1
+    fi
+else
+    echo "Prisma schema not found at ${schema_path}; skipping client generation."
+fi
+
 # Check if config file exists in the correct addon config directory
 config_path="/config/addons_config/litellm/${config_file}"
 if [[ -f "${config_path}" ]]; then
