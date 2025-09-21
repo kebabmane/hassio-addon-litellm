@@ -16,7 +16,7 @@ echo "Port: ${port}"
 echo "Config file: ${config_file}"
 echo "Log level: ${log_level}"
 
-# Ensure Prisma client is generated before starting LiteLLM when DB features are used
+# Ensure Prisma client is generated into the add-on config dir so it persists between restarts
 schema_path=$(python3 - <<'PY'
 import pathlib
 import litellm
@@ -25,12 +25,29 @@ print(schema)
 PY
 )
 
+prisma_cache_dir="/config/addons_config/litellm/prisma"
+mkdir -p "${prisma_cache_dir}"
+
 if [[ -f "${schema_path}" ]]; then
-    echo "Generating Prisma client from schema at ${schema_path}"
-    if ! python3 -m prisma generate --schema "${schema_path}"; then
+    echo "Copying Prisma schema to ${prisma_cache_dir}"
+    cp "${schema_path}" "${prisma_cache_dir}/schema.prisma"
+    echo "Generating Prisma client using schema at ${prisma_cache_dir}/schema.prisma"
+    pushd "${prisma_cache_dir}" >/dev/null || {
+        echo "Failed to enter ${prisma_cache_dir}; cannot continue." >&2
+        exit 1
+    }
+    if ! python3 -m prisma generate --schema "${prisma_cache_dir}/schema.prisma"; then
+        popd >/dev/null
         echo "Failed to generate Prisma client; cannot continue." >&2
         exit 1
     fi
+    popd >/dev/null
+    if [[ ! -d "${prisma_cache_dir}/prisma" ]]; then
+        echo "Prisma generation did not produce a client in ${prisma_cache_dir}/prisma" >&2
+        exit 1
+    fi
+    export PYTHONPATH="${prisma_cache_dir}:${PYTHONPATH}"
+    echo "PYTHONPATH updated to include generated Prisma client: ${PYTHONPATH}"
 else
     echo "Prisma schema not found at ${schema_path}; skipping client generation."
 fi
