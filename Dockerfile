@@ -5,19 +5,20 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    python3 \
-    python3-pip \
     bash \
     curl \
+    git \
     jq \
+    python3 \
+    python3-pip \
     tzdata \
     && rm -rf /var/lib/apt/lists/*
 
 # Upgrade pip first
 RUN python3 -m pip install --upgrade pip
 
-# Install litellm with proxy extras, prisma client, and bundled tzdata fallback
-RUN pip3 install --no-cache-dir "litellm[proxy]" prisma tzdata
+# Install litellm from the latest main branch along with extras
+RUN pip3 install --no-cache-dir "litellm[proxy] @ git+https://github.com/BerriAI/litellm.git@main" prisma tzdata
 
 # Set timezone data directory for Python
 ENV PYTHONPATH="/usr/share/zoneinfo:$PYTHONPATH"
