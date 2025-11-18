@@ -1,5 +1,5 @@
 name: LiteLLM Proxy
-version: "1.0.2"
+version: "1.1.0"
 slug: litellm_proxy
 description: "LiteLLM Proxy - Universal LLM API Gateway for Home Assistant"
 url: "https://github.com/kebabmane/hassio-addon-litellm"
